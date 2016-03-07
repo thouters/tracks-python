@@ -39,6 +39,8 @@ class TracksClient:
       return self.url + "/todos/done.xml"
     elif type == 'context':
       return self.url + "/contexts.xml"
+    elif type == 'calendar':
+      return self.url + "/calendar.xml"
     elif type == 'project':
       return self.url + "/projects.xml"
 
@@ -58,6 +60,9 @@ class TracksClient:
     self.getRawContexts()
     self.parseContexts()
     return self.contexts
+
+  def parseCalendars(self):
+    self.parseXml('todo')
 
   def parseContexts(self):
     self.parseXml('context')
@@ -110,10 +115,13 @@ class TracksClient:
     for element in elements:
       item  = {}
       for node in element.childNodes:
+        print node
         if node.nodeName != '#text':
           if len(node.childNodes) > 0:
             innerHTML = node.childNodes[0].nodeValue
             item[node.nodeName] = innerHTML
+          else:
+            print "not childnodes",  node
       # add node to self.todos list, e.g.
       getattr(self, type + 's').append(item)
 
@@ -127,11 +135,24 @@ class TracksClient:
 
     return self.todos
 
+  def getCalendar(self):
+    #self.getContexts()
+    self.getRawCalendars()
+    self.parseCalendars()
+    return self.todos
+
   def getRawTodos(self):
     self.todos_url = self.getTracksUrl('todo') 
     self.makeRequest(self.todos_url)
     self.checkAuthenticated()
     return self.raw_response
+
+  def getRawCalendars(self):
+    self.calendar_url = self.getTracksUrl('calendar')
+    self.makeRequest(self.calendar_url)
+    self.checkAuthenticated()
+    return self.raw_response
+
 
   def getRawDoneTodos(self):
     self.done_todos_url = self.getTracksUrl('done_todo') 
